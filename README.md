@@ -18,7 +18,7 @@ src/: Contains the Java source code for the Spring Pet Clinic application.
 pom.xml: Maven build configuration file for managing dependencies.
 
 # How to Build and Run
-Clone the Repository: git clone https://github.com/sohelmohammed/spring-petclinic.git
+Clone the Repository: git clone https://github.com/sohelmohammed0/spring-petclinic.git
 cd spring-petclinic
 
 # Build the Docker Image
