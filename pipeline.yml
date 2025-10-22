@@ -1,42 +1,39 @@
 trigger:
-- main
+- main  # Trigger pipeline on changes to the 'main' branch
 
 pool:
-  vmImage: 'ubuntu-latest'
+  name: 'Default'  # Use default pool if your agent is already registered with Azure DevOps
+  demands:
+    - agent.name == spc  # Specify your custom agent's name ('spc')
 
 variables:
-  javaVersion: '11'
+  javaVersion: '11'  # Define Java version for consistency
+  mavenVersion: '3.8.1'  # Define Maven version (if needed)
 
 jobs:
 - job: Build
   displayName: 'Build and Test Java Project'
   steps:
 
-    # Step 1: Checkout the code
-    - checkout: self  # Fixed Checkout Task
+    # Step 1: Checkout the code from GitHub
+    - checkout: self  # Default GitHub checkout
 
-    # Step 2: Set up JDK (Java 11)
-    - task: UseJavaToolInstaller@1
-      inputs:
-        versionSpec: '$(javaVersion)'  # Use the Java version defined in variables
+    # Step 2: Set up the environment (Java and Maven should already be installed on the agent)
+    - script: java -version
+      displayName: 'Verify Java Installation'
 
-    # Step 3: Cache Maven dependencies (optional)
-    - task: Cache@2
-      inputs:
-        key: 'maven | "$(Build.SourcesDirectory)/pom.xml"'
-        restoreKeys: |
-          maven | "$(Build.SourcesDirectory)/pom.xml"
-        path: $(MavenArtifactsDirectory)
+    - script: mvn -version
+      displayName: 'Verify Maven Installation'
 
-    # Step 5: Build the project using Maven
+    # Step 3: Build the project using Maven
     - script: mvn clean install -DskipTests
       displayName: 'Maven Build'
 
-    # Step 6: Run tests with Maven
+    # Step 4: Run tests with Maven
     - script: mvn test
       displayName: 'Run Unit Tests'
 
-    # Step 7: Publish build artifacts (e.g., JAR or WAR file)
+    # Step 5: Publish build artifacts (e.g., JAR or WAR file)
     - task: PublishBuildArtifacts@1
       inputs:
         PathtoPublish: '$(Build.ArtifactStagingDirectory)/target'
