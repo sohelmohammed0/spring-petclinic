@@ -1,40 +1,34 @@
+# =========================================
+# Basic Java Build Pipeline (Maven)
+# Using Self-Hosted Ubuntu Agent
+# =========================================
+
 trigger:
-- main  # Trigger pipeline on changes to the 'main' branch
+  branches:
+    include:
+      - main     # Pipeline runs when changes are pushed to main
 
-# Use a hosted agent pool (Azure DevOps provides hosted agents with Java/Maven already installed)
 pool:
-  vmImage: 'ubuntu-latest'  # You can use 'windows-latest' or 'macos-latest' based on your needs
+  name: 'Default'            # Use your self-hosted agent pool name
+  demands:
+    - java
+    - maven
 
-variables:
-  javaVersion: '11'  # Java version (adjust as needed)
-  mavenVersion: '3.8.1'  # Maven version (adjust as needed)
+steps:
+  # Step 1: Checkout code
+  - checkout: self
+    displayName: "Checkout source code"
 
-jobs:
-- job: Build
-  displayName: 'Build and Test Java Project'
-  steps:
+  # Step 2: Build Java project with Maven
+  - script: |
+      echo "Building Java project..."
+      mvn clean package -DskipTests=false
+    displayName: "Run Maven build"
 
-    # Step 1: Checkout the code from the repository
-    - checkout: self  # Checkout code
-
-    # Step 2: Verify Java and Maven installations (optional)
-    - script: java -version
-      displayName: 'Verify Java Installation'
-
-    - script: mvn -version
-      displayName: 'Verify Maven Installation'
-
-    # Step 3: Build the project using Maven
-    - script: mvn clean install -DskipTests
-      displayName: 'Maven Build'
-
-    # Step 4: Run unit tests with Maven
-    - script: mvn test
-      displayName: 'Run Unit Tests'
-
-    # Step 5: Publish build artifacts (e.g., JAR or WAR file)
-    - task: PublishBuildArtifacts@1
-      inputs:
-        PathtoPublish: '$(Build.ArtifactStagingDirectory)/target'
-        ArtifactName: 'drop'
-        publishLocation: 'Container'
+  # Step 3: Publish build artifacts (JARs from target/)
+  - task: PublishBuildArtifacts@1
+    inputs:
+      pathToPublish: 'target'
+      artifactName: 'java-build'
+      publishLocation: 'Container'
+    displayName: "Publish build artifacts"
