@@ -2,9 +2,9 @@ trigger:
 - main  # Trigger pipeline on changes to the 'main' branch
 
 pool:
-  name: 'Default'  # Use default pool if your agent is already registered with Azure DevOps
+  name: 'Default'  # Default pool if your agent is already registered with Azure DevOps
   demands:
-    - agent.name == spc  # Specify your custom agent's name ('spc')
+    - agent.name == spc  # Specify your custom agent name ('spc')
 
 variables:
   javaVersion: '11'  # Define Java version for consistency
@@ -18,7 +18,7 @@ jobs:
     # Step 1: Checkout the code from GitHub
     - checkout: self  # Default GitHub checkout
 
-    # Step 2: Set up the environment (Java and Maven should already be installed on the agent)
+    # Step 2: Verify Java and Maven are correctly installed on the custom agent
     - script: java -version
       displayName: 'Verify Java Installation'
 
