@@ -1,24 +1,23 @@
 trigger:
-- main  # Trigger pipeline on changes to the 'main' branch
+- main  # Trigger the pipeline on changes to the 'main' branch
 
+# Use a hosted agent pool (Azure DevOps provides hosted agents with Java/Maven already installed)
 pool:
-  name: 'Default'  # Default pool if your agent is already registered with Azure DevOps
-  demands:
-    - agent.name == spc  # Specify your custom agent name ('spc')
+  vmImage: 'ubuntu-latest'  # You can also use 'windows-latest' or 'macos-latest' depending on your project
 
 variables:
-  javaVersion: '11'  # Define Java version for consistency
-  mavenVersion: '3.8.1'  # Define Maven version (if needed)
+  javaVersion: '17'  # Java version (adjust as needed)
+  mavenVersion: '3.9.11'  # Maven version (adjust as needed)
 
 jobs:
 - job: Build
   displayName: 'Build and Test Java Project'
   steps:
 
-    # Step 1: Checkout the code from GitHub
-    - checkout: self  # Default GitHub checkout
+    # Step 1: Checkout the code from the repository
+    - checkout: self  # Checkout the code from the repository
 
-    # Step 2: Verify Java and Maven are correctly installed on the custom agent
+    # Step 2: Verify Java and Maven installations (optional)
     - script: java -version
       displayName: 'Verify Java Installation'
 
@@ -29,7 +28,7 @@ jobs:
     - script: mvn clean install -DskipTests
       displayName: 'Maven Build'
 
-    # Step 4: Run tests with Maven
+    # Step 4: Run unit tests with Maven
     - script: mvn test
       displayName: 'Run Unit Tests'
 
