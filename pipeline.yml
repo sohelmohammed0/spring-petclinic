@@ -1,0 +1,29 @@
+trigger: 
+- main
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+variables: 
+  javaVersion: "17"
+
+jobs: 
+- job: Build
+  displayName: 'Build and test the Java Project (spc)'
+  steps:
+
+    - task: Checkout@2
+
+    - task: UseJavaToolInstaller@1
+      inputs: 
+        versionSpec: '$(javaVersion)'
+
+
+    - script: mvn package
+      displayName: 'SPC build with maven'
+
+    - task: PublishBuildArtifact@1
+      inputs: 
+        PathtoPublish: '$(Build.ArtifactStagingDirectory)/target'
+        ArtifactName: 'drop'
+        publishLocation: 'container'
