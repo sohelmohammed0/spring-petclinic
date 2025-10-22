@@ -1,42 +1,38 @@
 trigger:
-- main
+- main  # Trigger pipeline on changes to the 'main' branch
 
+# Use a hosted agent pool (Azure DevOps provides hosted agents with Java/Maven already installed)
 pool:
-  vmImage: 'ubuntu-latest'
+  vmImage: 'ubuntu-latest'  # You can use 'windows-latest' or 'macos-latest' based on your needs
 
 variables:
-  javaVersion: '11'
+  javaVersion: '11'  # Java version (adjust as needed)
+  mavenVersion: '3.8.1'  # Maven version (adjust as needed)
 
 jobs:
 - job: Build
   displayName: 'Build and Test Java Project'
   steps:
 
-    # Step 1: Checkout the code
-    - checkout: self  # Fixed Checkout Task
+    # Step 1: Checkout the code from the repository
+    - checkout: self  # Checkout code
 
-    # Step 2: Set up JDK (Java 11)
-    - task: UseJavaToolInstaller@1
-      inputs:
-        versionSpec: '$(javaVersion)'  # Use the Java version defined in variables
+    # Step 2: Verify Java and Maven installations (optional)
+    - script: java -version
+      displayName: 'Verify Java Installation'
 
-    # Step 3: Cache Maven dependencies (optional)
-    - task: Cache@2
-      inputs:
-        key: 'maven | "$(Build.SourcesDirectory)/pom.xml"'
-        restoreKeys: |
-          maven | "$(Build.SourcesDirectory)/pom.xml"
-        path: $(MavenArtifactsDirectory)
+    - script: mvn -version
+      displayName: 'Verify Maven Installation'
 
-    # Step 5: Build the project using Maven
+    # Step 3: Build the project using Maven
     - script: mvn clean install -DskipTests
       displayName: 'Maven Build'
 
-    # Step 6: Run tests with Maven
+    # Step 4: Run unit tests with Maven
     - script: mvn test
       displayName: 'Run Unit Tests'
 
-    # Step 7: Publish build artifacts (e.g., JAR or WAR file)
+    # Step 5: Publish build artifacts (e.g., JAR or WAR file)
     - task: PublishBuildArtifacts@1
       inputs:
         PathtoPublish: '$(Build.ArtifactStagingDirectory)/target'
