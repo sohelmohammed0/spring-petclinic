@@ -1,0 +1,44 @@
+trigger:
+- main
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+variables:
+  javaVersion: '11'
+
+jobs:
+- job: Build
+  displayName: 'Build and Test Java Project'
+  steps:
+
+    # Step 1: Checkout the code
+    - checkout: self  # Fixed Checkout Task
+
+    # Step 2: Set up JDK (Java 11)
+    - task: UseJavaToolInstaller@1
+      inputs:
+        versionSpec: '$(javaVersion)'  # Use the Java version defined in variables
+
+    # Step 3: Cache Maven dependencies (optional)
+    - task: Cache@2
+      inputs:
+        key: 'maven | "$(Build.SourcesDirectory)/pom.xml"'
+        restoreKeys: |
+          maven | "$(Build.SourcesDirectory)/pom.xml"
+        path: $(MavenArtifactsDirectory)
+
+    # Step 5: Build the project using Maven
+    - script: mvn clean install -DskipTests
+      displayName: 'Maven Build'
+
+    # Step 6: Run tests with Maven
+    - script: mvn test
+      displayName: 'Run Unit Tests'
+
+    # Step 7: Publish build artifacts (e.g., JAR or WAR file)
+    - task: PublishBuildArtifacts@1
+      inputs:
+        PathtoPublish: '$(Build.ArtifactStagingDirectory)/target'
+        ArtifactName: 'drop'
+        publishLocation: 'Container'
