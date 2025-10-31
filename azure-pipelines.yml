@@ -1,34 +1,13 @@
-# =========================================
-# Basic Java Build Pipeline (Maven)
-# Using Self-Hosted Ubuntu Agent
-# =========================================
-
 trigger:
-  branches:
-    include:
-      - main     # Pipeline runs when changes are pushed to main
+- main
 
 pool:
-  name: 'Default'            # Use your self-hosted agent pool name
-  demands:
-    - java
-    - maven
+  name: Default
 
-steps:
-  # Step 1: Checkout code
-  - checkout: self
-    displayName: "Checkout source code"
-
-  # Step 2: Build Java project with Maven
-  - script: |
-      echo "Building Java project..."
-      mvn clean package -DskipTests=false
-    displayName: "Run Maven build"
-
-  # Step 3: Publish build artifacts (JARs from target/)
-  - task: PublishBuildArtifacts@1
-    inputs:
-      pathToPublish: 'target'
-      artifactName: 'java-build'
-      publishLocation: 'Container'
-    displayName: "Publish build artifacts"
+stages:
+- stage: Build
+  jobs:
+  - job: BuildWithMaven
+    steps:
+    - script: mvn package
+      displayName: 'Build with Maven'
